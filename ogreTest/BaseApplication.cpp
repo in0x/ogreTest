@@ -22,7 +22,6 @@ http://www.ogre3d.org/wiki/
 #endif
 
 #include <chrono>
-#include <fstream>
 
 BaseApplication::BaseApplication(void)
     : mRoot(0),
@@ -62,7 +61,6 @@ bool BaseApplication::configure(void)
         // If returned true, user clicked OK so initialise.
         // Here we choose to let the system create a default rendering window by passing 'true'.
         mWindow = mRoot->initialise(true, "TutorialApplication Render Window");
-
         return true;
     }
     else
@@ -151,32 +149,13 @@ void BaseApplication::loadResources(void)
 
 void BaseApplication::go(void)
 {
-#ifdef _DEBUG
-#ifndef OGRE_STATIC_LIB
-	mResourcesCfg = m_ResourcePath + "resources_d.cfg";
-	mPluginsCfg = m_ResourcePath + "plugins_d.cfg";
-#else
-	mResourcesCfg = "resources_d.cfg";
-	mPluginsCfg = "plugins_d.cfg";
-#endif
-#else
-#ifndef OGRE_STATIC_LIB
-	mResourcesCfg = m_ResourcePath + "resources.cfg";
-	mPluginsCfg = m_ResourcePath + "plugins.cfg";
-#else
-	mResourcesCfg = "resources.cfg";
-	mPluginsCfg = "plugins.cfg";
-#endif
-#endif
 
-	if (!setup())
-		return;
+
+	/*if (!setup())
+		return;*/
 
 	//mRoot->startRendering();
 	//while (mRoot->renderOneFrame());
-
-	std::ofstream resultFile;
-	resultFile.open("result.txt");
 
 	using ms = std::chrono::duration<float, std::milli>;
 	using c_time = std::chrono::time_point<std::chrono::steady_clock>;
@@ -186,15 +165,19 @@ void BaseApplication::go(void)
 	c_time start;
 	c_time end;
 
-	int frames = 100;
+	int frames = 1000;
 	int currentFrame = 0;
 
 	float deltaTime = 0.f;
 	float totalRuntime = 0.f;
 
+	auto root = mSceneMgr->getRootSceneNode();
+
 	while (true)
 	{
 		start = timer.now();
+
+		//root->translate(Ogre::Vector3(0,0,0));
 
 		if (!mRoot->_fireFrameStarted())
 			break;
@@ -215,8 +198,10 @@ void BaseApplication::go(void)
 			break;
 	}
 
+	int numNodes = (std::pow(childNodesPerLevel, levels + 1) - 1) / (childNodesPerLevel - 1);
 	float result = totalRuntime / frames;
-	resultFile << "Result: " << result << " ms per frame avg";
+
+	resultFile << "\t" << numNodes << " & " << result << " \\\\ \\hline \n";
 
     // Clean up
     destroyScene();
@@ -228,6 +213,7 @@ bool BaseApplication::setup(void)
 
     setupResources();
 
+	// Opens config window
     bool carryOn = configure();
     if (!carryOn) return false;
 
@@ -242,9 +228,6 @@ bool BaseApplication::setup(void)
     createResourceListener();
     // Load resources
     loadResources();
-
-    // Create the scene
-    createScene();
 
     return true;
 };

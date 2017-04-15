@@ -26,6 +26,7 @@ http://www.ogre3d.org/wiki/
 #include <OgreSceneManager.h>
 #include <OgreRenderWindow.h>
 #include <OgreConfigFile.h>
+#include <fstream>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #  include <OIS/OISEvents.h>
@@ -75,12 +76,16 @@ public:
 
     virtual void go(void);
 
+	int levels;
+	int childNodesPerLevel;
+	std::ofstream resultFile;
+
 protected:
     virtual bool setup();
     virtual bool configure(void);
     virtual void chooseSceneManager(void);
     virtual void createCamera(void);
-    virtual void createScene(void) = 0; // Override me!
+	virtual void createScene() = 0;
     virtual void destroyScene(void);
     virtual void createViewports(void);
     virtual void setupResources(void);

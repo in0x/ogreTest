@@ -1,68 +1,97 @@
-/*
------------------------------------------------------------------------------
-Filename:    TutorialApplication.cpp
------------------------------------------------------------------------------
-
-This source file is part of the
-   ___                 __    __ _ _    _
-  /___\__ _ _ __ ___  / / /\ \ (_) | _(_)
- //  // _` | '__/ _ \ \ \/  \/ / | |/ / |
-/ \_// (_| | | |  __/  \  /\  /| |   <| |
-\___/ \__, |_|  \___|   \/  \/ |_|_|\_\_|
-      |___/
-Tutorial Framework (for Ogre 1.9)
-http://www.ogre3d.org/wiki/
------------------------------------------------------------------------------
-*/
-
 #include "TutorialApplication.h"
 
-//---------------------------------------------------------------------------
 TutorialApplication::TutorialApplication(void)
 {
 }
-//---------------------------------------------------------------------------
+
 TutorialApplication::~TutorialApplication(void)
 {
 }
 
-//---------------------------------------------------------------------------
-void TutorialApplication::createScene(void)
+void TutorialApplication::createScene()
 {
-    // Create your scene here :)
-
 	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.5f, 0.5f, 0.5f));
 
 	Ogre::Light* light = mSceneMgr->createLight("MainLight");
 	light->setPosition(20, 80, 50);
 
-	mCamera->setPosition(0, 47, 222);
-	
-	int levels = 14;
-	int childNodesPerLevel = 2;
+	//mCamera->setPosition(0, 47, 222);
 
 	std::vector<Ogre::SceneNode*> level;
 	level.push_back(mSceneMgr->getRootSceneNode());
 
+	int offset = 0;
+
 	for (int i = 0; i < levels; ++i)
-	{
+	{	
 		std::vector<Ogre::SceneNode*> nextLevel;
 
 		for (auto& node : level)
 		{
 			for (int child = 0; child < childNodesPerLevel; ++child)
 			{
-				auto childNode = node->createChildSceneNode();
+				auto childNode = node->createChildSceneNode(Ogre::Vector3(0,0,offset));
 				auto childEntity = mSceneMgr->createEntity("ogrehead.mesh");
 				childNode->attachObject(childEntity);
 				nextLevel.push_back(childNode);
+
+				offset++;
 			}
 		}
 
 		level = nextLevel;
 	}
 }
-//---------------------------------------------------------------------------
+
+void TutorialApplication::go()
+{
+#ifdef _DEBUG
+#ifndef OGRE_STATIC_LIB
+	mResourcesCfg = m_ResourcePath + "resources_d.cfg";
+	mPluginsCfg = m_ResourcePath + "plugins_d.cfg";
+#else
+	mResourcesCfg = "resources_d.cfg";
+	mPluginsCfg = "plugins_d.cfg";
+#endif
+#else
+#ifndef OGRE_STATIC_LIB
+	mResourcesCfg = m_ResourcePath + "resources.cfg";
+	mPluginsCfg = m_ResourcePath + "plugins.cfg";
+#else
+	mResourcesCfg = "resources.cfg";
+	mPluginsCfg = "plugins.cfg";
+#endif
+#endif
+
+	resultFile.open("result.txt");
+
+	resultFile << "\\begin{figure}[!ht] \n";
+	resultFile << "\\begin{center}\n";
+
+	resultFile << "\t\\begin{tabular}{ | l | l | } \n";
+	resultFile << "\t\\hline \n";
+	resultFile << "\tNodes(\\#) & Time(ms) \\\\ \\hline \n";
+
+	levels = 1;
+	int levels_test = 18;
+	childNodesPerLevel = 2;
+
+	BaseApplication::setup();
+
+	for (; levels <= levels_test; levels += 1)
+	{
+		createScene();
+		BaseApplication::go();
+		mSceneMgr->clearScene();
+	}
+
+	resultFile << "\t\\end{tabular} \n";
+	resultFile << "\\end{center}";
+	resultFile << "\\caption{empty} \n";
+	resultFile << "\\label{figure:empty} \n";
+	resultFile << "\\end{figure} \n";
+
+}
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
