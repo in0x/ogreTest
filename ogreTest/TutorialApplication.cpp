@@ -15,12 +15,13 @@ void TutorialApplication::createScene()
 	Ogre::Light* light = mSceneMgr->createLight("MainLight");
 	light->setPosition(20, 80, 50);
 
-	//mCamera->setPosition(0, 47, 222);
+	auto root = mSceneMgr->getRootSceneNode();
+	root->translate(Ogre::Vector3(0, 0, 0));
 
 	std::vector<Ogre::SceneNode*> level;
-	level.push_back(mSceneMgr->getRootSceneNode());
+	level.push_back(root);
 
-	int offset = 0;
+	float offset = 10;
 
 	for (int i = 0; i < levels; ++i)
 	{	
@@ -30,12 +31,10 @@ void TutorialApplication::createScene()
 		{
 			for (int child = 0; child < childNodesPerLevel; ++child)
 			{
-				auto childNode = node->createChildSceneNode(Ogre::Vector3(0,0,offset));
+				auto childNode = node->createChildSceneNode(Ogre::Vector3(offset * i, -offset * child, 0));
 				auto childEntity = mSceneMgr->createEntity("ogrehead.mesh");
 				childNode->attachObject(childEntity);
 				nextLevel.push_back(childNode);
-
-				offset++;
 			}
 		}
 

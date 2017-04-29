@@ -149,14 +149,6 @@ void BaseApplication::loadResources(void)
 
 void BaseApplication::go(void)
 {
-
-
-	/*if (!setup())
-		return;*/
-
-	//mRoot->startRendering();
-	//while (mRoot->renderOneFrame());
-
 	using ms = std::chrono::duration<float, std::milli>;
 	using c_time = std::chrono::time_point<std::chrono::steady_clock>;
 
